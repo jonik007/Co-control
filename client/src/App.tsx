@@ -10,11 +10,13 @@ import type { HistoryPayload } from './types';
 
 const STORAGE_KEY = 'git-gantt:repo-path';
 
+/** Defaults match the customer's answers: hundreds of commits, merge commits
+ * absorb the side-branch diff, X axis is real time, local-only use. */
 const DEFAULT_OPTIONS: Options = {
-  limit: 2000,
-  mergeDiff: 'none',
+  limit: 500,
+  mergeDiff: 'first-parent',
   dateMode: 'author',
-  xScale: 'ordinal',
+  xScale: 'time',
   rowH: 20,
 };
 
@@ -26,7 +28,8 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const [selected, setSelected] = useState<CellSelection | null>(null);
-  const [pxPerCommit, setPxPerCommit] = useState(10);
+  // Average column width; in time mode this sets total canvas width for the span.
+  const [pxPerCommit, setPxPerCommit] = useState(14);
 
   const load = useCallback(
     (path: string, opts: Options) => {

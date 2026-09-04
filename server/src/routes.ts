@@ -6,7 +6,8 @@ import { inspectRepo, readChangeDetail } from './git/repo.js';
 import { PathRejected, resolveRepoPath } from './security.js';
 
 const MAX_LIMIT = Number(process.env.GITGANTT_MAX_COMMITS ?? 20_000);
-const DEFAULT_LIMIT = Number(process.env.GITGANTT_DEFAULT_COMMITS ?? 2_000);
+/** Target workload is a few hundred commits; 500 leaves headroom without a heavy payload. */
+const DEFAULT_LIMIT = Number(process.env.GITGANTT_DEFAULT_COMMITS ?? 500);
 
 const historyCache = new LruCache<History>(4);
 

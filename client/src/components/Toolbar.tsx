@@ -65,8 +65,8 @@ export function Toolbar({ repoPath, loading, options, history, onLoad, onOptions
             value={options.xScale}
             onChange={(event) => onOptions({ xScale: event.target.value as XScaleMode })}
           >
-            <option value="ordinal">по порядку коммитов</option>
             <option value="time">по реальному времени</option>
+            <option value="ordinal">по порядку коммитов</option>
           </select>
         </label>
         <label className="field inline">
@@ -86,9 +86,10 @@ export function Toolbar({ repoPath, loading, options, history, onLoad, onOptions
             name="mergeDiff"
             value={options.mergeDiff}
             onChange={(event) => onOptions({ mergeDiff: event.target.value as MergeDiffMode })}
+            title="Присваивать — мерж показывает diff относительно первого родителя (влитые изменения)"
           >
-            <option value="none">без изменений</option>
-            <option value="first-parent">относительно 1-го родителя</option>
+            <option value="first-parent">присваивать влитые</option>
+            <option value="none">не показывать изменения</option>
           </select>
         </label>
         <label className="field inline">
