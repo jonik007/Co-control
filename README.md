@@ -82,3 +82,13 @@ npm run fixture        # создать репозиторий с "злыми" �
   переименование с большой правкой в том же коммите склеено не будет.
 
 Подробнее о причинах — в [docs/PITFALLS.md](docs/PITFALLS.md).
+
+## Другие проекты в этом репозитории
+
+- **[docker-web-console/](docker-web-console/)** — веб-консоль для управления Docker-контейнерами (React + Express), отдельное приложение. Git Gantt его не использует: свои `client/` и `server/` у консоли лежат внутри подкаталога.
+
+  ```bash
+  cd docker-web-console
+  npm run install:all
+  npm run dev            # API :4000, React :3000
+  ```
