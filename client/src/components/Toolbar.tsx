@@ -33,6 +33,7 @@ export function Toolbar({ repoPath, loading, options, history, onLoad, onOptions
         <label className="field grow">
           <span>Каталог репозитория</span>
           <input
+            name="repoPath"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             placeholder="C:\Users\me\projects\my-app"
@@ -40,13 +41,13 @@ export function Toolbar({ repoPath, loading, options, history, onLoad, onOptions
             autoComplete="off"
           />
         </label>
-        <label className="field">
+        <label className="field" title="Применяется при нажатии «Построить»">
           <span>Коммитов</span>
           <input
+            name="limit"
             type="number"
             min={10}
             max={20000}
-            step={100}
             value={options.limit}
             onChange={(event) => onOptions({ limit: Number(event.target.value) || 100 })}
           />
@@ -60,6 +61,7 @@ export function Toolbar({ repoPath, loading, options, history, onLoad, onOptions
         <label className="field inline">
           <span>Ось X</span>
           <select
+            name="xScale"
             value={options.xScale}
             onChange={(event) => onOptions({ xScale: event.target.value as XScaleMode })}
           >
@@ -70,6 +72,7 @@ export function Toolbar({ repoPath, loading, options, history, onLoad, onOptions
         <label className="field inline">
           <span>Дата</span>
           <select
+            name="dateMode"
             value={options.dateMode}
             onChange={(event) => onOptions({ dateMode: event.target.value as DateMode })}
           >
@@ -80,6 +83,7 @@ export function Toolbar({ repoPath, loading, options, history, onLoad, onOptions
         <label className="field inline">
           <span>Мержи</span>
           <select
+            name="mergeDiff"
             value={options.mergeDiff}
             onChange={(event) => onOptions({ mergeDiff: event.target.value as MergeDiffMode })}
           >
@@ -90,6 +94,7 @@ export function Toolbar({ repoPath, loading, options, history, onLoad, onOptions
         <label className="field inline">
           <span>Высота строки</span>
           <input
+            name="rowH"
             type="range"
             min={14}
             max={34}

@@ -219,8 +219,8 @@ export function Diagram({
     [cellAt, onSelect],
   );
 
-  const onWheel = useCallback(
-    (event: React.WheelEvent<HTMLDivElement>) => {
+  const onWheelZoom = useCallback(
+    (event: WheelEvent) => {
       if (!event.ctrlKey && !event.metaKey) return;
       event.preventDefault();
       const canvas = canvasRef.current;
@@ -236,6 +236,21 @@ export function Diagram({
     },
     [axis.pxPerCommit, onPxPerCommitChange, scroll.left],
   );
+
+  const zoomRef = useRef(onWheelZoom);
+  useEffect(() => {
+    zoomRef.current = onWheelZoom;
+  }, [onWheelZoom]);
+
+  useEffect(() => {
+    const element = scrollerRef.current;
+    if (!element) return;
+    // React registers wheel handlers as passive, which makes preventDefault() a
+    // no-op there, so Ctrl+wheel would zoom the whole page instead of the axis.
+    const listener = (event: WheelEvent) => zoomRef.current(event);
+    element.addEventListener('wheel', listener, { passive: false });
+    return () => element.removeEventListener('wheel', listener);
+  }, []);
 
   const firstRow = Math.max(0, Math.floor(scroll.top / rowH) - 2);
   const lastRow = Math.min(rows.length - 1, Math.ceil((scroll.top + size.height) / rowH) + 2);
@@ -262,7 +277,7 @@ export function Diagram({
         />
       </div>
 
-      <div className="scroller" ref={scrollerRef} onScroll={onScroll} onWheel={onWheel}>
+      <div className="scroller" ref={scrollerRef} onScroll={onScroll}>
         <div
           className="scroll-content"
           style={{ width: TREE_WIDTH + axis.totalWidth, height: rows.length * rowH }}

@@ -62,12 +62,10 @@ export function App() {
     (patch: Partial<Options>) => {
       setOptions((prev) => {
         const next = { ...prev, ...patch };
-        // Only these two change what the server has to compute.
-        if (
-          history &&
-          repoPath &&
-          (next.limit !== prev.limit || next.mergeDiff !== prev.mergeDiff)
-        ) {
+        // Merge handling changes what the server computes. The commit limit does
+        // too, but it is typed digit by digit, so it waits for an explicit
+        // "Построить" instead of firing a request per keystroke.
+        if (history && repoPath && next.mergeDiff !== prev.mergeDiff) {
           load(repoPath, next);
         }
         return next;
