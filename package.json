@@ -1,0 +1,26 @@
+{
+  "name": "git-gantt",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Временная диаграмма изменений git-репозитория: коммиты по X, дерево файлов по Y",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm --workspace server run dev",
+    "dev:client": "npm --workspace client run dev",
+    "build": "npm --workspace server run build && npm --workspace client run build",
+    "start": "npm --workspace server run start",
+    "test": "npm --workspace server run test",
+    "typecheck": "npm --workspace server run typecheck && npm --workspace client run typecheck",
+    "fixture": "bash scripts/make-fixture-repo.sh /tmp/fixture-repo"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
