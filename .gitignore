@@ -1,26 +1,15 @@
-# Dependencies
 node_modules/
 **/node_modules/
-
-# Production builds
-client/build/
-server/dist/
-
-# Env files
+dist/
+**/dist/
+.vite/
 .env
 .env.local
 .env.*.local
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 *.log
-
-# OS / editor
+npm-debug.log*
 .DS_Store
 .vscode/
 .idea/
-
-# Coverage
 coverage/
+*.tsbuildinfo

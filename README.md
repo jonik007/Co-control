@@ -1,98 +1,84 @@
-# Docker Web Console
+# Git Gantt
 
-A web-based console for managing Docker containers and images — think **Docker Desktop, but in your browser**. The frontend is a React app built with `react-scripts` (Create React App); the backend is a small Express API that talks to the Docker Engine through [`dockerode`](https://github.com/apocas/dockerode).
+Клиент-серверное приложение, которое строит временную диаграмму изменений в
+git-репозитории: по горизонтали — коммиты, по вертикали — дерево папок и файлов.
+Точка на пересечении означает, что коммит затронул файл; полоса вдоль строки —
+время жизни файла в репозитории. Цвет и бейдж — по расширению. Клик по
+пересечению открывает детали с diff.
 
-## Features
+Перед реализацией разобраны нетривиальные места задачи:
 
-- **Containers view** — list all containers with live status, ports, and creation time. Start, stop, restart, pause/unpause, and remove containers with one click.
-- **Container details drawer** — inspect metadata, tail live logs, and watch live CPU/memory/network stats with a CPU history sparkline.
-- **Run a new container** — pick (or type) an image, optional name, a host↔container port mapping, and environment variables.
-- **Images view** — list local images with size/age/usage, pull new images by name, remove unused ones, or launch a container straight from an image.
-- **Live sidebar summary** — running/paused/stopped counts and Docker engine version, auto-refreshed.
-- **Works without Docker installed** — if no Docker daemon is reachable, the backend automatically serves realistic **mock data** so the UI is fully explorable/demoable.
+- **[docs/PITFALLS.md](docs/PITFALLS.md)** — подводные камни и соображения
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — принятые решения, модель данных, API
 
-## Project structure
-
-```
-.
-├── client/   # React app (react-scripts / Create React App)
-└── server/   # Express API backed by dockerode (or the in-memory mock)
-```
-
-## Requirements
-
-- Node.js 18+
-- Docker Engine running locally, with the socket accessible to the server process (optional — the app falls back to mock mode automatically)
-
-## Getting started
-
-Install dependencies for both apps:
+## Запуск
 
 ```bash
-npm run install:all
+npm install
+npm run dev            # сервер на 127.0.0.1:4317, клиент на 127.0.0.1:5317
 ```
 
-### Development (hot reload)
+Откройте <http://127.0.0.1:5317> и укажите путь к каталогу с репозиторием,
+например `C:\Users\me\projects\my-app`.
 
-Runs the API on port `4000` and the React dev server on port `3000` (proxying `/api` to the backend):
+Продакшен-сборка отдаёт клиент с того же порта, что и API:
 
 ```bash
-npm run dev
+npm run build
+npm start              # http://127.0.0.1:4317
 ```
 
-Then open http://localhost:3000.
+## Управление
 
-### Production-style run (single server)
+| Действие | Как |
+|---|---|
+| Масштаб по времени | `Ctrl` + колесо мыши над диаграммой |
+| Развернуть/свернуть папку | клик по треугольнику в дереве |
+| Детали изменения | клик по точке пересечения |
+| Закрыть детали | `Esc` |
 
-Builds the React app and serves it from the Express server on one port:
+По умолчанию: ось X — реальное время, мержи присваивают себе влитые изменения
+(`first-parent`), лимит 500 коммитов, сервер только на `127.0.0.1`.
+
+Переключатели в панели: ось X (время / порядок коммитов), дата (автора / коммита),
+обработка мержей, высота строки, лимит коммитов.
+
+## Тесты
 
 ```bash
-npm start
+npm test               # парсер, склейка переименований, детали, валидация пути
+npm run typecheck
+npm run fixture        # создать репозиторий с "злыми" случаями в /tmp/fixture-repo
 ```
 
-Then open http://localhost:4000.
+`scripts/make-fixture-repo.sh` собирает репозиторий с переименованиями, переносом
+каталога, удалением и восстановлением файла, юникод-путями, путями с пробелами и
+кавычками, мержем, бинарным файлом и изменением режима доступа. Тесты работают
+против него, а не против моков.
 
-## Docker backend modes
+## Переменные окружения
 
-The server decides how to talk to Docker via the `USE_MOCK` environment variable:
+| Переменная | По умолчанию | Назначение |
+|---|---|---|
+| `PORT` | `4317` | порт API |
+| `GITGANTT_HOST` | `127.0.0.1` | адрес прослушивания; менять только осознанно |
+| `GITGANTT_GIT_PATH` | `git` | путь к `git.exe`, если его нет в `PATH` |
+| `GITGANTT_ALLOWED_ROOTS` | не задано | список каталогов, вне которых читать репозитории запрещено |
+| `GITGANTT_DEFAULT_COMMITS` | `500` | лимит коммитов по умолчанию |
+| `GITGANTT_MAX_COMMITS` | `20000` | жёсткий верхний предел |
+| `GITGANTT_GIT_TIMEOUT_MS` | `60000` | таймаут вызова git |
 
-| `USE_MOCK` | Behavior |
-| --- | --- |
-| unset / `auto` (default) | Tries to reach the local Docker daemon; falls back to the mock backend if it can't. |
-| `true` | Always use the in-memory mock backend (useful for demos/tests without Docker). |
-| `false` | Always use the real Docker daemon; fails to start if it can't connect. |
+## Ограничения текущей версии
 
-Example — force mock mode:
+- Мержи по умолчанию «присваивают» себе diff относительно первого родителя
+  (`-m --first-parent`): влитые правки видны на столбце мержа, но те же
+  изменения уже были в коммитах feature-ветки — при просмотре всей истории
+  это двойной учёт на уровне «факт изменения», а не дублирование коммитов.
+  Режим «не показывать изменения» остаётся в панели.
+- Показывается история одной ветки (`HEAD`), DAG не рисуется.
+- Дерево строится по актуальным путям файлов: перемещённый файл живёт по своему
+  конечному пути всю историю, прежние пути видны в деталях.
+- Детектирование переименований — эвристика git по схожести содержимого, поэтому
+  переименование с большой правкой в том же коммите склеено не будет.
 
-```bash
-USE_MOCK=true npm run dev:server
-```
-
-By default, `dockerode` connects to the local Docker socket (`/var/run/docker.sock` on Linux/macOS, or the named pipe on Windows). To connect to a remote engine, set the standard `DOCKER_HOST` (and related `DOCKER_*` TLS) environment variables before starting the server.
-
-## API overview
-
-All endpoints are served under `/api` by the Express app in `server/`:
-
-| Method & path | Description |
-| --- | --- |
-| `GET /api/system/info` | Docker engine info/version + current backend mode |
-| `GET /api/containers` | List all containers |
-| `GET /api/containers/:id` | Inspect one container |
-| `GET /api/containers/:id/logs` | Fetch recent logs (`?tail=`) |
-| `GET /api/containers/:id/stats` | One-shot CPU/memory/network stats |
-| `POST /api/containers` | Create a container `{ image, name?, ports?, env? }` |
-| `POST /api/containers/:id/start` | Start a container |
-| `POST /api/containers/:id/stop` | Stop a container |
-| `POST /api/containers/:id/restart` | Restart a container |
-| `POST /api/containers/:id/pause` | Pause a container |
-| `POST /api/containers/:id/unpause` | Unpause a container |
-| `DELETE /api/containers/:id` | Remove a container (`?force=true`) |
-| `GET /api/images` | List local images |
-| `POST /api/images/pull` | Pull an image `{ repoTag }` |
-| `DELETE /api/images/:id` | Remove an image |
-
-## Notes
-
-- The browser cannot talk to the Docker Engine API directly (no CORS/auth support, and it would expose the socket to the network), so this project always goes through the Express backend.
-- The mock backend simulates realistic container/image data and state transitions, so the whole UI can be developed and tested in any environment, with or without Docker installed.
+Подробнее о причинах — в [docs/PITFALLS.md](docs/PITFALLS.md).
