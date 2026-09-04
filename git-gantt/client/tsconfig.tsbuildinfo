@@ -1,1 +1,0 @@
-{"root":["./src/App.tsx","./src/api.ts","./src/main.tsx","./src/types.ts","./src/components/DetailsPanel.tsx","./src/components/Diagram.tsx","./src/components/Legend.tsx","./src/components/Toolbar.tsx","./src/lib/ext.ts","./src/lib/render.ts","./src/lib/scales.ts","./src/lib/tree.ts","./vite.config.ts"],"errors":true,"version":"5.9.3"}
