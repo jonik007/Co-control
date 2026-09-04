@@ -1,0 +1,22 @@
+{
+  "name": "docker-web-console-server",
+  "version": "1.0.0",
+  "description": "Backend API for Docker Web Console - manages Docker containers/images via the Docker Engine API (dockerode).",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dockerode": "^4.0.2",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
